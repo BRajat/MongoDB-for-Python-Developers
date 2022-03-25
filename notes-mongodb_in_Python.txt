@@ -1,0 +1,118 @@
+## MongoDB in Python
+
+### URI - Uniform Resource Indentifier
+1. Used to define connection between applications and to connect to mongodb database.
+
+We use uri connection string to connect to mongodb db. We use srv type of uri link-
+
+mongodb+srv://<username>:<password>@<cluster>.mongodb.net/admin
+
+FORMAT -
+[ <service_name>://<user_name>:<password>@<cluster_name>/<database_name> ]
+
+mongodb+srv://<username>:<password>@<cluster>.mongodb.net/admin?retryWrites=true
+
+[ ?retryWrites=true ] --> to retry in event of network fails.
+---------------
+
+### 
+user: m220student
+password: m220password
+
+mongosh "mongodb+srv://mflix.7jzwf.mongodb.net/myFirstDatabase" --apiVersion 1 --username m220student
+
+mongodb+srv://m220student:m220password@mflix.7jzwf.mongodb.net/admin
+
+----------------------
+Chapter-1: Driver Setup
+
+Application architecture for mflix-
+In mflix folder,
+api - flask code
+build - frontend code
+
+db.py ==> to write pymongo code
+run status test and copy it as ticket validation.
+
+-----------
+MongoClient ( class in pymongo library)
+
+client = MongoClient(uri)
+client.stats
+
+we now have client object for connection.
+
+client.db.collection.methods
+------ code given in jupyter notebook at mflix-python/notebooks
+
+db.movies.find({'countries': countries}, { "title": 1, "_id": 0 })
+
+---------------
+User Facing Backend
+
+Date - 18 Mar 2022
+
+mongosh "mongodb+srv://mflix.7jzwf.mongodb.net/myFirstDatabase" --apiVersion 1 --username m220student80 
+
+Ticket solved: user Management - inserting and deleting from documents.
+Ticket solved: Durable Write: used write concern field with 'w':'majority'
+
+Basic aggregation: Joins in MongoDB
+We want to retrieve the comments for all movies
+
+each comment has movie_id field that is populated.
+So, when we are locally on movies field, we match all movies in the decade of 90s
+after that we join them with the comments collection.
+To join we use $lookup aggregation methods.
+Locally we are in movies collection so we populate the from field with 'comments' collection
+we declare 'id' as a internal variable inside our lookup query, by using the let field.
+Its value is equal to '_id' field in movies table
+Then we write pipeline query, inside we evaluate a expression where movie_id from comments collection is equal to our variable value(_id of movies collection)
+
+
+
+The code exported for aggregation utility looks like this-
+[
+    {
+        '$match': {
+            'year': {
+                '$gte': 1980, 
+                '$lt': 1990
+            }
+        }
+    }, {
+        '$lookup': {
+            'from': 'comments', 
+            'let': {
+                'id': '$_id'
+            }, 
+            'pipeline': [
+                {
+                    '$match': {
+                        '$expr': {
+                            '$eq': [
+                                '$movie_id', '$$id'
+                            ]
+                        }
+                    }
+                }
+            ], 
+            'as': 'movie_comments'
+        }
+    }
+]
+
+----------------------------------------
+Bulk writes in mongoDB- uses-
+1. reduces latency, since writes are batched and ordered.
+2. if ordered is false, the writes are parallelized. 
+3. if writes are not in casual relationship, parallelized method is better.
+4. 
+
+
+db.movies.find({'lastupdated':{'$type':'string'}}).count()
+
+db.movies.find({ "lastupdate": { '$exists': true, '$ne': null, '$type':'string' } }).count()
+
+
+mongodb+srv://mflixAppUser:mflixAppPwd@mflix.7jzwf.mongodb.net/sample_mflix
