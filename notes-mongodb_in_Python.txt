@@ -10,7 +10,8 @@ mongodb+srv://<username>:<password>@<cluster>.mongodb.net/admin
 FORMAT -
 [ <service_name>://<user_name>:<password>@<cluster_name>/<database_name> ]
 
-mongodb+srv://<username>:<password>@<cluster>.mongodb.net/admin?retryWrites=true
+mongodb+srv://<username>:<password>@<cluster>.mongodb.net/adm
+?retryWrites=true
 
 [ ?retryWrites=true ] --> to retry in event of network fails.
 ---------------
